@@ -8,11 +8,18 @@ from datetime import datetime
 class BaseModel:
     """Base class for the HBnB project"""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initilizes an instance of the class"""
-        self.id = str(uuid.uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    if key in ["created_at", "updated_at"]:
+                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                    setattr(self, key, value)
+        else:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
 
     def save(self):
         """updates the public instance attribute
