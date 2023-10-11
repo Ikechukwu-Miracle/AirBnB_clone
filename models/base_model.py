@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 """Defines BaseModel class"""
+import models
 import uuid
 from datetime import datetime
-
 
 
 class BaseModel:
@@ -10,22 +10,26 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """Initilizes an instance of the class"""
+
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+
         if kwargs:
-            for key, value in kwargs.items():
+            for key, val in kwargs.items():
                 if key != "__class__":
                     if key in ["created_at", "updated_at"]:
-                        value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                    setattr(self, key, value)
+                        val = datetime.strptime(val, "%Y-%m-%dT%H:%M:%S.%f")
+                    setattr(self, key, val)
         else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
+            models.storage.new(self)
 
     def save(self):
         """updates the public instance attribute
         updated_at with the current datetime
         """
         self.updated_at = datetime.now()
+        models.storage.save()
 
     def to_dict(self):
         """ returns a dictionary containing all
