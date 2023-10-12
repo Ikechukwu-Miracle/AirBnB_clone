@@ -1,7 +1,8 @@
 #!/usr/bin/python3
+"""Defines a Storage class"""
 import json
 from models.base_model import BaseModel
-"""Defines a Storage class"""
+from models.user import User
 
 
 class FileStorage:
