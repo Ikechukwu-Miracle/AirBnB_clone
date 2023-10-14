@@ -2,14 +2,35 @@
 """This module contains the HBNBCommand class"""
 import cmd
 import sys
+import re
 from models import storage
 from models.user import User
 from models.base_model import BaseModel
+from models.state import State
+from models.city import City
+from models.place import Place
+from models.amenity import Amenity
+from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
+    """A CLI for the Hbnb program.
+
+    Attributes:
+        prompt (str): prompt to display before command
+        classes (list): list of classes
+    """
+
     prompt = "(hbnb) "
-    classes = ["BaseModel", "User"]
+    classes = [
+            "BaseModel",
+            "User",
+            "State",
+            "City",
+            "Place",
+            "Amenity",
+            "Review"
+            ]
 
     def do_quit(self, line):
         """Exits the program when the user types "quit"
@@ -84,7 +105,6 @@ class HBNBCommand(cmd.Cmd):
         """
 
         objs = storage.all()
-        obj_list = []
 
         if not arg:
             print(["{}".format(str(v)) for _, v in objs.items()])
@@ -130,10 +150,24 @@ class HBNBCommand(cmd.Cmd):
             setattr(objs[key], attr, value)
             storage.save()
 
+    def precmd(self, arg):
+        if not arg:
+            return
+
+        pattern = re.compile(r"(\w+)\.(\w+)\(\)")
+
+        arg_match = pattern.findall(arg)
+
+        if not arg_match:
+            return super().precmd(arg)
+
+        args_tup = arg_match[0]
+        r_var = "{} {}".format(args_tup[1], args_tup[0])
+        return super().precmd(r_var)
+
 def check_class(args, cls_id=False):
     """Validates the arguments passed to the commands"""
 
-    objs = storage.all()
     if not args:
         print("** class name missing **")
         return False
