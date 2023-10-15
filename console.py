@@ -151,10 +151,11 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
     def precmd(self, arg):
+        """Defines instructions to execute before interpretation of line"""
         if not arg:
-            return
+            return "\n"
 
-        pattern = re.compile(r"(\w+)\.(\w+)\(\)")
+        pattern = re.compile(r"(\w+)\.(\w+)\((.*)\)")
 
         arg_match = pattern.findall(arg)
 
@@ -162,8 +163,17 @@ class HBNBCommand(cmd.Cmd):
             return super().precmd(arg)
 
         args_tup = arg_match[0]
-        r_var = "{} {}".format(args_tup[1], args_tup[0])
-        return super().precmd(r_var)
+        if not args_tup[2]:
+            if args_tup[1] == "count":
+                count(args_tup)
+                return "\n"
+            r_var = "{} {}".format(args_tup[1], args_tup[0])
+            return super().precmd(r_var)
+        else:
+            args = args_tup[2].split(", ")
+            if len(args) == 1:
+                args[0] = re.sub("[\"\']", "", args[0])
+                return "{} {} {}".format(args_tup[1], args_tup[0], args[0])
 
 def check_class(args, cls_id=False):
     """Validates the arguments passed to the commands"""
@@ -179,6 +189,14 @@ def check_class(args, cls_id=False):
         return False
     return True
 
+def count(arg):
+    """counts the number of instances in the given class"""
+    result = 0
+    objs = storage.all()
+    for key, val in objs.items():
+        if type(val).__name__ == arg[0]:
+            result += 1
+    print(result)
 
 if __name__ == '__main__':
     HBNBCommand().cmdloop()
