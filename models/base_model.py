@@ -24,7 +24,7 @@ class BaseModel:
         else:
             models.storage.new(self)
 
-    def save(self) -> None:
+    def save(self):
         """updates the public instance attribute
         updated_at with the current datetime
         """
