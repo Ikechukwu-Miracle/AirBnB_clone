@@ -3,6 +3,7 @@
 import cmd
 import sys
 import re
+import json
 from models import storage
 from models.user import User
 from models.base_model import BaseModel
@@ -123,9 +124,22 @@ class HBNBCommand(cmd.Cmd):
         Usage: update <class> <id> <attribute> <value>
         """
 
-        args = arg.split()
         objs = storage.all()
+        if "{" in arg:
+            args = arg.split(" ", maxsplit=2)
+            if not check_class(args, cls_id=True):
+                return
 
+            key = "{}.{}".format(args[0], args[1])
+            payload: dict = json.loads(args[2])
+            for key_name, val in payload.items():
+                if key_name in ["id", "created_at", "updated_at"]:
+                    return
+                setattr(objs[key], key_name, val)
+            storage.save()
+            return
+
+        args = arg.split()
         if not check_class(args, cls_id=True):
             return
 
@@ -152,6 +166,7 @@ class HBNBCommand(cmd.Cmd):
 
     def precmd(self, arg):
         """Defines instructions to execute before interpretation of line"""
+
         if not arg:
             return "\n"
 
@@ -174,6 +189,19 @@ class HBNBCommand(cmd.Cmd):
             if len(args) == 1:
                 args[0] = re.sub("[\"\']", "", args[0])
                 return "{} {} {}".format(args_tup[1], args_tup[0], args[0])
+
+            if len(args) == 3 and "{" in args[1]:
+                json_args = re.findall(r"{.*}", args_tup[2])
+                if json_args:
+                    args[0] = re.sub("[\"\']", "", args[0])
+                    json_args[0] = re.sub("\'", "\"", json_args[0])
+                    return "{} {} {} {}".format(args_tup[1], args_tup[0],
+                       args[0], json_args[0])
+
+            args[0] = re.sub("[\"\']", "", args[0])
+            args[1] = re.sub("[\"\']", "", args[1])
+            return "{} {} {} {} {}".format(args_tup[1], args_tup[0],
+              args[0], args[1], args[2])
 
 def check_class(args, cls_id=False):
     """Validates the arguments passed to the commands"""
