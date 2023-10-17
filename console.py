@@ -196,7 +196,7 @@ class HBNBCommand(cmd.Cmd):
                     args[0] = re.sub("[\"\']", "", args[0])
                     json_args[0] = re.sub("\'", "\"", json_args[0])
                     return "{} {} {} {}".format(args_tup[1], args_tup[0],
-                       args[0], json_args[0])
+                            args[0], json_args[0])
 
             args[0] = re.sub("[\"\']", "", args[0])
             args[1] = re.sub("[\"\']", "", args[1])
